@@ -1,0 +1,42 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "tsx --conditions=development --env-file=.env --watch src/index.ts",
+    "build": "npm run clean && tsc",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "imports": {
+    "#root/*": {
+      "development": "./src/*.ts",
+      "default": "./dist/*.js"
+    },
+    "#server/*": {
+      "development": "./src/server/*.ts",
+      "default": "./dist/server/*.js"
+    },
+    "#utils/*": {
+      "development": "./src/utils/*.ts",
+      "default": "./dist/utils/*.js"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.8",
+    "hono": "^4.7.1"
+  }
+}

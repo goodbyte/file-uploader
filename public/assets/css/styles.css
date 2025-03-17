@@ -1,0 +1,143 @@
+:root {
+  --primary-color: #6A90F3;
+  --primary-background: hsl(from var(--primary-color) h s l / 15%);
+  --success-color: #4FBF4F;
+  --success-background: hsl(from var(--success-color) h s l / 15%);
+  --error-color: #F26A6A;
+  --error-background: hsl(from var(--error-color) h s l / 15%);
+  accent-color: var(--primary-color);
+}
+
+@property --progress {
+  syntax: '<percentage>';
+  initial-value: 0%;
+  inherits: false;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: inherit;
+}
+
+body {
+  display: grid;
+  place-content: center;
+  min-height: 100vh;
+  padding: 40px;
+  font-family: system-ui, sans-serif;;
+  color: var(--primary-color);
+}
+
+ul {
+  list-style: none;
+}
+
+#dropzone {
+  display: grid;
+  place-content: center;
+  place-items: center;
+  min-width: 300px;
+  aspect-ratio: 1;
+  padding: 20px;
+  border: 2px dashed var(--primary-color);
+  cursor: pointer;
+}
+
+#dropzone * {
+  pointer-events: none;
+}
+
+#fileList:empty {
+  display: none;
+}
+
+#fileList li::before {
+  content: 'upload_file';
+  display: block;
+  font-family: 'Material Symbols Outlined';
+  font-size: 24px;
+}
+
+#fileList li {
+  --progress: 0%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: linear-gradient(to right, var(--success-background) var(--progress), var(--primary-background) var(--progress));
+  border: 1px solid;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+#fileList li.success {
+  background: var(--success-background);
+  color: var(--success-color);
+  cursor: pointer;
+}
+
+#fileList li.error {
+  background: var(--error-background);
+  color: var(--error-color);
+}
+
+#fileList li.success::after {
+  display: block;
+  margin-left: auto;
+  font-family: 'Material Symbols Outlined';
+  font-size: 24px;
+}
+
+#fileList li.success::before {
+  content: 'task';
+}
+
+#fileList li.error::before {
+  content: 'scan_delete';
+}
+
+#fileList li.success::after {
+  content: 'open_in_new';
+}
+
+.flex,
+.flex-column {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.gap-10 {
+  gap: 10px;
+}
+
+.gap-20 {
+  gap: 20px;
+}
+
+.font-size-48 {
+  font-size: 48px;
+}
+
+.file-name {
+  max-width: 280px;
+  overflow: hidden;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

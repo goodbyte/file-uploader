@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File uploader</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<body>
+  <div class="flex-column gap-20">
+    <div id="dropzone">
+      <span class="font-size-48 material-symbols-outlined">cloud_upload</span>
+      <strong class="dropzone__text">Drop your .png or .jpg files here!</strong>
+      <span>Max file size 5MB</span>
+      <input type="file" name="files" id="inputFile" accept="image/*" hidden multiple>
+    </div>
+    <ul id="fileList" class="flex-column gap-10"></ul>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const dropzoneText = dropzone.querySelector('.dropzone__text');
+    const dropzoneOriginalText = dropzoneText.textContent;
+    const inputFile = document.getElementById('inputFile');
+    const fileList = document.getElementById('fileList');
+
+    inputFile.addEventListener('change', onFileChange);
+
+    dropzone.addEventListener('click', () => inputFile.click());
+
+    dropzone.addEventListener('dragenter', () => {
+      dropzoneText.textContent = 'Drop files to upload!';
+    });
+
+    dropzone.addEventListener('dragover', (event) => event.preventDefault());
+
+    dropzone.addEventListener('dragleave', restoreDropzoneText);
+    dropzone.addEventListener('drop', onFileChange); 
+
+    function onFileChange(event) {
+      event.preventDefault();
+      restoreDropzoneText();
+      updateFileList(
+        Array.from(event.target.files || event.dataTransfer.files)
+      );
+    }
+
+    function restoreDropzoneText() {
+      dropzoneText.textContent = dropzoneOriginalText;
+    }
+
+    function updateFileList(newFiles) {
+      fileList.append(...newFiles.map(createFileLi));
+    }
+
+    function createFileLi(file, index) {
+      const li = document.createElement('li');
+      const span = document.createElement('span');
+
+      span.textContent = file.name;
+      span.classList.add('file-name');
+      
+      li.appendChild(span);
+
+      createFileRequest(file, li);
+
+      return li;
+    }
+
+    function createFileRequest(file, li) {
+      const _5MB = 5 * 1024 * 1024;
+
+      const setError = (message) => {
+        li.classList.add('error');
+        li.title = message;
+        console.error(`Error uploading file "${ file.name }". ${ message }`);
+      };
+
+      if (!file.type.match(/image\//)) return setError('File is not an image');
+      if (file.size === 0) return setError('File size is 0, make sure to select a valid file');
+      if (file.size > _5MB) return setError('File is too big, max file size is 5MB');
+
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+
+      formData.append('file', file);
+
+      xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+          const progress = (event.loaded / event.total) * 100;
+          li.style.setProperty('--progress', `${ progress.toFixed(1) }%`);
+        }
+      };
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          try {
+            if (xhr.status === 0) return setError('The server is unreachable. Ensure you are connected to the internet and the server is running.');
+            if (xhr.status !== 200) throw new Error(xhr.responseText);
+
+            const response = JSON.parse(xhr.responseText);
+            
+            li.classList.add('success');
+            li.title = 'File uploaded successfully, click to open it';
+            li.addEventListener('click', () => window.open(response.url));
+            console.log(`File "${ file.name }" uploaded successfully!`);
+          } catch (error) {
+            setError(`Failed to upload file, reason: "${ error.message }"`);
+          }
+        }
+      };
+
+      xhr.open('POST', 'http://localhost:3000/api/upload', true);
+      xhr.send(formData);
+    }
+  </script>
+</body>
+
+</html>
